@@ -1,8 +1,10 @@
 import type { MetaFunction } from "@remix-run/node";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import katex from "katex";
+import "katex/dist/katex.min.css"; // Importa estilos de KaTeX
 
 export const meta: MetaFunction = () => {
-  return [{ title: "New Remix App" }, { name: "description", content: "Welcome to Remix!" }];
+  return [{ title: "Cálculo de Esfuerzos en Suelo - Mecánica de Suelos II" }, { name: "description", content: "Calcular I3 en Mecánica de Suelos II" }];
 };
 
 export default function Index() {
@@ -10,6 +12,13 @@ export default function Index() {
   const [L, setL] = useState<number | null>(null);
   const [z, setZ] = useState<number | null>(null);
   const [resultado, setResultado] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"sin-pi" | "con-pi">("sin-pi"); // Controla la pestaña activa
+
+  useEffect(() => {
+    // Renderizar KaTeX en la pestaña
+    katex.render("\\pi", document.getElementById("pi-formula") as HTMLElement);
+    katex.render("\\pi", document.getElementById("pi-formula-2") as HTMLElement);
+  }, [activeTab]);
 
   const calcularI3 = () => {
     if (B === null || L === null || z === null) {
@@ -27,8 +36,11 @@ export default function Index() {
     // Calcular la segunda parte con arcotangente
     const parte2 = Math.atan((2 * m * n * Math.sqrt(m ** 2 + n ** 2 + 1)) / (n ** 2 - m ** 2 + 1));
 
-    // Calcular I3
-    const I3 = (1 / (4 * Math.PI)) * (parte1 + parte2);
+    // Dependiendo de la pestaña activa, sumamos o no pi
+    let I3 = (1 / (4 * Math.PI)) * (parte1 + parte2);
+    if (activeTab === "con-pi") {
+      I3 += Math.PI;
+    }
 
     // Mostrar el resultado
     setResultado(`El valor de I3 es: ${I3.toFixed(4)}`);
@@ -40,11 +52,20 @@ export default function Index() {
         <h1 className="text-4xl font-bold text-center text-gray-800">Pucesi</h1>
         <h2 className="text-2xl font-semibold text-center text-gray-600 mt-2">Mecánica de Suelos II</h2>
         <p className="text-center text-gray-500 mt-2 mb-6">
-          <strong>Autor:</strong> P.B.
+          <strong>Autor:</strong> Pablo Báez
         </p>
 
+        <div className="flex justify-center mb-6">
+          <button className={`px-4 py-2 mr-2 ${activeTab === "sin-pi" ? "bg-indigo-600 text-white" : "bg-gray-200"}`} onClick={() => setActiveTab("sin-pi")}>
+            Fórmula sin <span id="pi-formula" />
+          </button>
+          <button className={`px-4 py-2 ${activeTab === "con-pi" ? "bg-indigo-600 text-white" : "bg-gray-200"}`} onClick={() => setActiveTab("con-pi")}>
+            Fórmula con <span id="pi-formula-2" />
+          </button>
+        </div>
+
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Cálculo de Esfuerzos en el Suelo</h2>
-        <p className="mb-6 text-gray-600">Método de Boussinesq</p>
+        <p className="mb-6 text-gray-600">Método de Boussinesq.</p>
 
         <div className="space-y-4">
           <div>
